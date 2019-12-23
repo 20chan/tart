@@ -1,0 +1,3 @@
+[submodule "CreamRoll"]
+	path = CreamRoll
+	url = git@github.com:20chan/CreamRoll
