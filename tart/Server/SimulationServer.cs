@@ -78,7 +78,7 @@ namespace tart.Server {
             }, status: StatusCode.BadRequest);
         }
 
-        class CreateSimulationRequest {
+        struct CreateSimulationRequest {
             public int ModelIndex { get; set; }
         }
 
