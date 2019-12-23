@@ -90,6 +90,8 @@ namespace tart.Simulations.Models.Example {
             return GetAvailableUpgrades();
         }
 
+        Type IGame.UpgradeType => typeof(ExampleKind);
+
         public class SimpleUpgrade : IUpgrade {
             public int MaxLevel => Values.Length;
             public double[] Prices, Values;
@@ -130,7 +132,7 @@ namespace tart.Simulations.Models.Example {
             ExampleGame IChoice<ExampleGame>.Game => Game;
             float IChoice<ExampleGame>.Time => Time;
             double IChoice<ExampleGame>.Price => Price;
-            Enum IChoice<ExampleGame>.Type => UpgradeKind;
+            int IChoice<ExampleGame>.Type => (int)UpgradeKind;
 
             IStats<ExampleGame> IChoice<ExampleGame>.CurrentStats => CurrentStats;
             IStats<ExampleGame> IChoice<ExampleGame>.NextStats => NextStats;
