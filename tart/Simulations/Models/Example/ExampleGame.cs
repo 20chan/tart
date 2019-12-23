@@ -28,11 +28,20 @@ namespace tart.Simulations.Models.Example {
         }
 
         private Stats GetStats() {
+            return GetStats(Money, SpeedLevel, MoneyLevel);
+        }
+
+        private Stats GetStats(double money, int speedLevel, int moneyLevel) {
             return new Stats {
-                Money = Money,
-                SpeedLevel = SpeedLevel,
-                MoneyLevel = MoneyLevel,
+                Money = money,
+                SpeedLevel = speedLevel,
+                MoneyLevel = moneyLevel,
+                MoneyPerSecond = GetMoneyPerSecond(speedLevel, moneyLevel),
             };
+        }
+
+        private double GetMoneyPerSecond(int speedLevel, int moneyLevel) {
+            return SpeedUpgrade.Value(speedLevel) * MoneyUpgrade.Value(moneyLevel);
         }
 
         private int GetLevelOf(ExampleKind kind) {
@@ -49,11 +58,9 @@ namespace tart.Simulations.Models.Example {
 
         private Stats GetStatsAfterUpgrade(ExampleKind kind) {
             var price = GetUpgradeOf(kind).Price(GetLevelOf(kind));
-            return new Stats {
-                Money = Money - price,
-                SpeedLevel = kind == ExampleKind.Speed ? SpeedLevel + 1 : SpeedLevel,
-                MoneyLevel = kind == ExampleKind.Money ? MoneyLevel + 1 : MoneyLevel,
-            };
+            var speedLevel = kind == ExampleKind.Speed ? SpeedLevel + 1 : SpeedLevel;
+            var moneyLevel = kind == ExampleKind.Money ? MoneyLevel + 1 : MoneyLevel;
+            return GetStats(Money - price, speedLevel, moneyLevel);
         }
 
         private IEnumerable<Upgrade> GetAvailableUpgrades() {
@@ -130,9 +137,10 @@ namespace tart.Simulations.Models.Example {
         }
 
         public struct Stats : IStats<ExampleGame> {
-            public double Money;
-            public int SpeedLevel;
-            public int MoneyLevel;
+            public double Money { get; set; }
+            public double MoneyPerSecond { get; set; }
+            public int SpeedLevel { get; set; }
+            public int MoneyLevel { get; set; }
         }
     }
 

@@ -72,6 +72,21 @@ namespace tart.Server {
             }
         }
 
+        [Get("/simulations/{id}/upgrades")]
+        public Response GetUpgradesOfSimulation(Request req) {
+            var idRaw = (string)req.Query["id"].ToString();
+            if (!int.TryParse(idRaw, out var id)) {
+                return ErrorResp("Invalid simulation id format");
+            }
+            if (id < 0 || _simulations.Count <= id) {
+                return ErrorResp("Simulation id out of range");
+            }
+
+            var simul = _simulations[id];
+            var choices = simul.GetAvailableChoices();
+            return new JsonResponse(JsonSerializer.Serialize(choices));
+        }
+
         private static JsonResponse ErrorResp(string message) {
             return new JsonResponse(new JSON {
                 ["message"] = message,
