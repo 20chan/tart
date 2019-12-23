@@ -11,7 +11,7 @@ namespace tart.Server {
 
         [Get("/")]
         public Response Index(Request req) {
-            return new TextResponse("wow it works");
+            return new JsonResponse("['wow it works']");
         }
     }
 }
