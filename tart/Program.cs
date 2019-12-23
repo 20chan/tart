@@ -2,11 +2,12 @@
 using System.Threading;
 using CreamRoll.Routing;
 using tart.Server;
+using tart.Simulations.Models.Example;
 
 namespace tart {
     class Program {
         static void Main(string[] args) {
-            var simul = new SimulationServer();
+            var simul = new SimulationServer(typeof(ExampleGame));
             var server = new RouteServer<SimulationServer>(simul);
             var waiter = new ManualResetEvent(false);
 
