@@ -64,7 +64,7 @@ namespace tart.Server {
                 _simulations.Add(game);
                 return new JsonResponse(new JSON {
                     ["id"] = _simulations.Count - 1,
-                });
+                }, status: StatusCode.Created);
             } catch (JsonException) {
                 return ErrorResp("Wrong json format");
             } catch (Exception ex) {
