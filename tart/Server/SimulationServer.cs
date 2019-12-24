@@ -67,7 +67,7 @@ namespace tart.Server {
                     ["id"] = _simulations.Count - 1,
                 }, status: StatusCode.Created);
             } catch (JsonException ex) {
-                return ErrorResp("Wrong json format", ex);
+                return ErrorResp("Invalid json format", ex);
             } catch (Exception ex) {
                 return ErrorResp("error", ex, StatusCode.InternalServerError);
             }
@@ -166,7 +166,7 @@ namespace tart.Server {
                 }
             }
             catch (JsonException ex) {
-                return ErrorResp("Wrong json format", ex);
+                return ErrorResp("Invalid json format", ex);
             } catch (Exception ex) {
                 return ErrorResp("error", ex, StatusCode.InternalServerError);
             }
