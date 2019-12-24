@@ -11,8 +11,10 @@ namespace tart.Simulations {
         float Time { get; }
 
         void Tick(float interval);
+        bool TryChoice(IChoice<IGame> choice);
 
         IReadOnlyCollection<IUpgrade> Upgrades { get; }
+        IReadOnlyCollection<int> Levels { get; }
         IStats<IGame> GetStats();
         IEnumerable<IChoice<IGame>> GetAvailableChoices();
 

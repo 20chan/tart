@@ -128,6 +128,24 @@ namespace tart.Server {
             });
         }
 
+        [Post("/simulations/{simulationId}/choices/{choiceId}")]
+        public Response CreateChoiceOfSimulation(Request req) {
+            var simulIndex = TryParseIndex(req, "simulationId", _simulations.Count, out var errorResp);
+            if (simulIndex < 0) return errorResp;
+
+            var simul = _simulations[simulIndex];
+            var choices = simul.GetAvailableChoices().ToArray();
+
+            var choiceIndex = TryParseIndex(req, "choiceId", choices.Length, out errorResp);
+            if (choiceIndex < 0) return errorResp;
+
+            var succeed = simul.TryChoice(choices[choiceIndex]);
+            if (!succeed) {
+                return ErrorResp("Not available choice");
+            }
+            return new JsonResponse(JsonSerializer.Serialize(simul, defaultJsonOptions));
+        }
+
         [Get("/simulations/{simulationId}/upgrades")]
         public Response GetUpgradesOfSimulation(Request req) {
             var simulIndex = TryParseIndex(req, "simulationId", _simulations.Count, out var errorResp);

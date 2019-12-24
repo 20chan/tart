@@ -10,15 +10,20 @@ namespace tart.Simulations.Models.Example {
         public float Time;
 
         public IUpgrade[] Upgrades = {
-            new SimpleUpgrade(10, ExampleKind.Speed), // speed
-            new SimpleUpgrade(20, ExampleKind.Money), // money
+            new SimpleUpgrade(10, ExampleKind.Speed),
+            new SimpleUpgrade(20, ExampleKind.Money),
+        };
+
+        public int[] Levels = {
+            0, // speed
+            0, // money
         };
 
         public ref IUpgrade SpeedUpgrade => ref Upgrades[0];
         public ref IUpgrade MoneyUpgrade => ref Upgrades[1];
 
-        public int SpeedLevel;
-        public int MoneyLevel;
+        public ref int SpeedLevel => ref Levels[0];
+        public ref int MoneyLevel => ref Levels[1];
 
         private void Income(double amount) {
             Money += amount;
@@ -46,10 +51,9 @@ namespace tart.Simulations.Models.Example {
             return SpeedUpgrade.GetValue(speedLevel) * MoneyUpgrade.GetValue(moneyLevel);
         }
 
-        private int GetLevelOf(ExampleKind kind) {
-            if (kind == ExampleKind.Speed) return SpeedLevel;
-            if (kind == ExampleKind.Money) return MoneyLevel;
-            return -1;
+        private ref int GetLevelOf(ExampleKind kind) {
+            if (kind == ExampleKind.Speed) return ref SpeedLevel;
+            return ref MoneyLevel;
         }
 
         private IUpgrade GetUpgradeOf(ExampleKind kind) {
@@ -78,6 +82,21 @@ namespace tart.Simulations.Models.Example {
             }
         }
 
+        private bool TryUpgrade(Choice choice) {
+            if (Money < choice.Price) {
+                return false;
+            }
+            ref var level = ref GetLevelOf(choice.UpgradeKind);
+            if (level >= GetUpgradeOf(choice.UpgradeKind).MaxLevel) {
+                return false;
+            }
+
+            Money -= choice.Price;
+            MoneyDec -= choice.Price;
+            level++;
+            return true;
+        }
+
         double IGame.Money => Money;
         double IGame.MoneyInc => MoneyInc;
         double IGame.MoneyDec => MoneyDec;
@@ -85,11 +104,19 @@ namespace tart.Simulations.Models.Example {
         float IGame.Time => Time;
 
         IReadOnlyCollection<IUpgrade> IGame.Upgrades => Upgrades;
+        IReadOnlyCollection<int> IGame.Levels => Levels;
         IStats<IGame> IGame.GetStats() {
             return GetStats();
         }
         IEnumerable<IChoice<IGame>> IGame.GetAvailableChoices() {
             return GetAvailableUpgrades();
+        }
+
+        bool IGame.TryChoice(IChoice<IGame> choice) {
+            if (choice is Choice ch) {
+                return TryUpgrade(ch);
+            }
+            return false;
         }
 
         Type IGame.UpgradeType => typeof(ExampleKind);
