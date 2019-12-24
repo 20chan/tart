@@ -55,6 +55,9 @@ namespace tart.Server {
         public async Task<Response> CreateSimulation(Request req) {
             try {
                 var body = await JsonSerializer.DeserializeAsync<CreateSimulationRequest>(req.Body, defaultJsonOptions);
+                if (_gameModelTypes.Length <= body.ModelIndex) {
+                    return ErrorResp("Model index out of range");
+                }
                 var model = _gameModelTypes[body.ModelIndex];
                 var game = (IGame)Activator.CreateInstance(model);
                 _simulations.Add(game);
