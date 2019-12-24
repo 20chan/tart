@@ -86,6 +86,17 @@ namespace tart.Server {
             return new JsonResponse(JsonSerializer.Serialize(simul, defaultJsonOptions));
         }
 
+        [Get("/api/simulations/{simulationId}/model")]
+        public Response GetSimulationModel(Request req) {
+            var simulIndex = TryParseIndex(req, "simulationId", _simulations.Count, out var errorResp);
+            if (simulIndex < 0) return errorResp;
+
+            var simul = _simulations[simulIndex];
+            return new JsonResponse(new JSON {
+                ["name"] = simul.GetType().Name,
+            });
+        }
+
         [Get("/api/simulations/{simulationId}/types")]
         public Response GetSimulationTypes(Request req) {
             var simulIndex = TryParseIndex(req, "simulationId", _simulations.Count, out var errorResp);
