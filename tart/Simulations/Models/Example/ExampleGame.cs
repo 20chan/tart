@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace tart.Simulations.Models.Example {
     public class ExampleGame : IGame {
@@ -8,12 +9,12 @@ namespace tart.Simulations.Models.Example {
         public float Time;
 
         public IUpgrade[] Upgrades = {
-            new SimpleUpgrade(10), // speed
-            new SimpleUpgrade(10), // money
+            new SimpleUpgrade(10, ExampleKind.Speed), // speed
+            new SimpleUpgrade(20, ExampleKind.Money), // money
         };
 
         public ref IUpgrade SpeedUpgrade => ref Upgrades[0];
-        public ref IUpgrade MoneyUpgrade => ref Upgrades[0];
+        public ref IUpgrade MoneyUpgrade => ref Upgrades[1];
 
         public int SpeedLevel;
         public int MoneyLevel;
@@ -63,7 +64,7 @@ namespace tart.Simulations.Models.Example {
             return GetStats(Money - price, speedLevel, moneyLevel);
         }
 
-        private IEnumerable<Upgrade> GetAvailableUpgrades() {
+        private IEnumerable<Choice> GetAvailableUpgrades() {
             var stats = GetStats();
 
             var kinds = new[] { ExampleKind.Speed, ExampleKind.Money };
@@ -71,7 +72,7 @@ namespace tart.Simulations.Models.Example {
                 var level = GetLevelOf(kind);
                 var upgrade = GetUpgradeOf(kind);
                 if (level < upgrade.MaxLevel) {
-                    yield return new Upgrade(this, Time, kind, upgrade.Price(level), stats, GetStatsAfterUpgrade(kind));
+                    yield return new Choice(this, Time, kind, upgrade.Price(level), stats, GetStatsAfterUpgrade(kind));
                 }
             }
         }
@@ -95,10 +96,12 @@ namespace tart.Simulations.Models.Example {
         public class SimpleUpgrade : IUpgrade {
             public int MaxLevel => Values.Length;
             public double[] Prices, Values;
+            public ExampleKind Kind;
 
-            public SimpleUpgrade(int level) {
+            public SimpleUpgrade(int level, ExampleKind kind) {
                 Prices = new double[level - 1];
                 Values = new double[level];
+                Kind = kind;
             }
 
             public double Price(int x) {
@@ -108,9 +111,13 @@ namespace tart.Simulations.Models.Example {
             public double Value(int x) {
                 return Values[x];
             }
+
+            int IUpgrade.Type => (int)Kind;
+            IEnumerable<double> IUpgrade.Prices => Prices;
+            IEnumerable<double> IUpgrade.Values => Values;
         }
 
-        public class Upgrade : IChoice<ExampleGame> {
+        public class Choice : IChoice<ExampleGame> {
             public ExampleGame Game;
             public float Time;
 
@@ -119,7 +126,7 @@ namespace tart.Simulations.Models.Example {
 
             public Stats CurrentStats, NextStats;
 
-            public Upgrade(ExampleGame game, float time, ExampleKind kind, double price, Stats current, Stats next) {
+            public Choice(ExampleGame game, float time, ExampleKind kind, double price, Stats current, Stats next) {
                 Game = game;
                 Time = time;
                 UpgradeKind = kind;
