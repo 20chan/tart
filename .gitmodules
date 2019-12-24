@@ -1,3 +1,6 @@
 [submodule "CreamRoll"]
 	path = CreamRoll
 	url = git@github.com:20chan/CreamRoll
+[submodule "tart/FrontEnd"]
+	path = tart/FrontEnd
+	url = git@github.com:20chan/tart-client
