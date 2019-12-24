@@ -28,26 +28,21 @@ namespace tart.Server {
             };
         }
 
-        [Get("/")]
-        public Response Index(Request req) {
-            return new TextResponse("it works!");
-        }
-
-        [Get("/models")]
+        [Get("/api/models")]
         public Response GetModels(Request req) {
             var models = _gameModelTypes.Select(g => g.Name).ToArray();
             var response = JsonSerializer.Serialize(models, defaultJsonOptions);
             return new JsonResponse(response);
         }
 
-        [Get("/simulations")]
+        [Get("/api/simulations")]
         public Response GetSimulations(Request req) {
             var simuls = _simulations.Select(g => g.GetType().Name).ToArray();
             var response = JsonSerializer.Serialize(simuls, defaultJsonOptions);
             return new JsonResponse(response);
         }
 
-        [Get("/simulations/{simulationId}")]
+        [Get("/api/simulations/{simulationId}")]
         public Response GetSimulation(Request req) {
             var simulIndex = TryParseIndex(req, "simulationId", _simulations.Count, out var errorResp);
             if (simulIndex < 0) return errorResp;
@@ -56,7 +51,7 @@ namespace tart.Server {
             return new JsonResponse(JsonSerializer.Serialize(simul, defaultJsonOptions));
         }
 
-        [Post("/simulations")]
+        [Post("/api/simulations")]
         public async Task<Response> CreateSimulation(Request req) {
             try {
                 var body = await JsonSerializer.DeserializeAsync<CreateSimulationRequest>(req.Body, defaultJsonOptions);
@@ -73,7 +68,7 @@ namespace tart.Server {
             }
         }
 
-        [Get("/simulations/{simulationId}/tick?{interval}=0.1")]
+        [Get("/api/simulations/{simulationId}/tick?{interval}=0.1")]
         public Response TickSimulation(Request req) {
             var simulIndex = TryParseIndex(req, "simulationId", _simulations.Count, out var errorResp);
             if (simulIndex < 0) return errorResp;
@@ -88,7 +83,7 @@ namespace tart.Server {
             return new JsonResponse(JsonSerializer.Serialize(simul, defaultJsonOptions));
         }
 
-        [Get("/simulations/{simulationId}/types")]
+        [Get("/api/simulations/{simulationId}/types")]
         public Response GetSimulationTypes(Request req) {
             var simulIndex = TryParseIndex(req, "simulationId", _simulations.Count, out var errorResp);
             if (simulIndex < 0) return errorResp;
@@ -100,7 +95,7 @@ namespace tart.Server {
             });
         }
 
-        [Get("/simulations/{simulationId}/choices")]
+        [Get("/api/simulations/{simulationId}/choices")]
         public Response GetChoicesOfSimulation(Request req) {
             var simulIndex = TryParseIndex(req, "simulationId", _simulations.Count, out var errorResp);
             if (simulIndex < 0) return errorResp;
@@ -110,7 +105,7 @@ namespace tart.Server {
             return new JsonResponse(JsonSerializer.Serialize(choices, defaultJsonOptions));
         }
 
-        [Get("/simulations/{simulationId}/choices/{choiceId}/type")]
+        [Get("/api/simulations/{simulationId}/choices/{choiceId}/type")]
         public Response GetChoiceTypeInfo(Request req) {
             var simulIndex = TryParseIndex(req, "simulationId", _simulations.Count, out var errorResp);
             if (simulIndex < 0) return errorResp;
@@ -128,7 +123,7 @@ namespace tart.Server {
             });
         }
 
-        [Post("/simulations/{simulationId}/choices/{choiceId}")]
+        [Post("/api/simulations/{simulationId}/choices/{choiceId}")]
         public Response CreateChoiceOfSimulation(Request req) {
             var simulIndex = TryParseIndex(req, "simulationId", _simulations.Count, out var errorResp);
             if (simulIndex < 0) return errorResp;
@@ -146,7 +141,7 @@ namespace tart.Server {
             return new JsonResponse(JsonSerializer.Serialize(simul, defaultJsonOptions));
         }
 
-        [Get("/simulations/{simulationId}/upgrades")]
+        [Get("/api/simulations/{simulationId}/upgrades")]
         public Response GetUpgradesOfSimulation(Request req) {
             var simulIndex = TryParseIndex(req, "simulationId", _simulations.Count, out var errorResp);
             if (simulIndex < 0) return errorResp;
@@ -156,7 +151,7 @@ namespace tart.Server {
             return new JsonResponse(JsonSerializer.Serialize(upgrades, defaultJsonOptions));
         }
 
-        [Get("/simulations/{simulationId}/upgrades/{upgradeId}")]
+        [Get("/api/simulations/{simulationId}/upgrades/{upgradeId}")]
         public Response GetUpgradeOfSimulation(Request req) {
             var simulIndex = TryParseIndex(req, "simulationId", _simulations.Count, out var errorResp);
             if (simulIndex < 0) return errorResp;
@@ -170,7 +165,7 @@ namespace tart.Server {
             return new JsonResponse(JsonSerializer.Serialize(upgrade, defaultJsonOptions));
         }
 
-        [Put("/simulations/{simulationId}/upgrades/{upgradeId}")]
+        [Put("/api/simulations/{simulationId}/upgrades/{upgradeId}")]
         public async Task<Response> UpdateUpgradeOfSimulation(Request req) {
             var simulIndex = TryParseIndex(req, "simulationId", _simulations.Count, out var errorResp);
             if (simulIndex < 0) return errorResp;

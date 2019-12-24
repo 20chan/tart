@@ -10,7 +10,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="FrontEnd\**" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="FrontEnd\**" CopyToOutputDirectory="Always" />
+    <Watch Include="FrontEnd\**" />
   </ItemGroup>
 
 </Project>
