@@ -73,6 +73,21 @@ namespace tart.Server {
             }
         }
 
+        [Get("/simulations/{simulationId}/tick?{interval}=0.1")]
+        public Response TickSimulation(Request req) {
+            var simulIndex = TryParseIndex(req, "simulationId", _simulations.Count, out var errorResp);
+            if (simulIndex < 0) return errorResp;
+
+            var simul = _simulations[simulIndex];
+            var intervalRaw = (string)req.Query["interval"].ToString();
+            if (!float.TryParse(intervalRaw, out var interval)) {
+                return ErrorResp("Invalid interval format");
+            }
+
+            simul.Tick(interval);
+            return new JsonResponse(JsonSerializer.Serialize(simul, defaultJsonOptions));
+        }
+
         [Get("/simulations/{simulationId}/types")]
         public Response GetSimulationTypes(Request req) {
             var simulIndex = TryParseIndex(req, "simulationId", _simulations.Count, out var errorResp);
