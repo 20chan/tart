@@ -11,7 +11,7 @@ namespace tart.Server {
         private List<IGame> _simulations;
         private Type[] _gameModelTypes;
 
-        protected static JsonSerializerOptions defaultJsonOptions;
+        protected static JsonSerializerOptions defaultJsonOptions, updateReqJsonOptions;
 
         public SimulationServer(params Type[] gameModelTypes) {
             _gameModelTypes = gameModelTypes;
@@ -19,6 +19,11 @@ namespace tart.Server {
 
             defaultJsonOptions = new JsonSerializerOptions {
                 PropertyNamingPolicy = new CamelBack(),
+                PropertyNameCaseInsensitive = true,
+            };
+
+            updateReqJsonOptions = new JsonSerializerOptions {
+                IgnoreNullValues = true,
                 PropertyNameCaseInsensitive = true,
             };
         }
@@ -61,10 +66,10 @@ namespace tart.Server {
                 return new JsonResponse(new JSON {
                     ["id"] = _simulations.Count - 1,
                 }, status: StatusCode.Created);
-            } catch (JsonException) {
-                return ErrorResp("Wrong json format");
+            } catch (JsonException ex) {
+                return ErrorResp("Wrong json format", ex);
             } catch (Exception ex) {
-                return ErrorResp(ex.Message);
+                return ErrorResp("error", ex, StatusCode.InternalServerError);
             }
         }
 
@@ -109,13 +114,64 @@ namespace tart.Server {
         }
 
         [Get("/simulations/{simulationId}/upgrades")]
-        public Response GetUpgradeOfSimulation(Request req) {
+        public Response GetUpgradesOfSimulation(Request req) {
             var simulIndex = TryParseIndex(req, "simulationId", _simulations.Count, out var errorResp);
             if (simulIndex < 0) return errorResp;
 
             var simul = _simulations[simulIndex];
             var upgrades = simul.Upgrades;
             return new JsonResponse(JsonSerializer.Serialize(upgrades, defaultJsonOptions));
+        }
+
+        [Get("/simulations/{simulationId}/upgrades/{upgradeId}")]
+        public Response GetUpgradeOfSimulation(Request req) {
+            var simulIndex = TryParseIndex(req, "simulationId", _simulations.Count, out var errorResp);
+            if (simulIndex < 0) return errorResp;
+
+            var simul = _simulations[simulIndex];
+            var upgrades = simul.Upgrades.ToArray();
+            var upgradeIndex = TryParseIndex(req, "upgradeId", upgrades.Length, out errorResp);
+            if (upgradeIndex < 0) return errorResp;
+
+            var upgrade = upgrades[upgradeIndex];
+            return new JsonResponse(JsonSerializer.Serialize(upgrade, defaultJsonOptions));
+        }
+
+        [Put("/simulations/{simulationId}/upgrades/{upgradeId}")]
+        public async Task<Response> UpdateUpgradeOfSimulation(Request req) {
+            var simulIndex = TryParseIndex(req, "simulationId", _simulations.Count, out var errorResp);
+            if (simulIndex < 0) return errorResp;
+
+            var simul = _simulations[simulIndex];
+            var upgrades = simul.Upgrades.ToArray();
+            var upgradeIndex = TryParseIndex(req, "upgradeId", upgrades.Length, out errorResp);
+            if (upgradeIndex < 0) return errorResp;
+
+            var upgrade = upgrades[upgradeIndex];
+
+            try {
+                var body = await JsonSerializer.DeserializeAsync<UpdateUpgradeRequest>(req.Body, updateReqJsonOptions);
+                if (body.MaxLevel > 0) {
+                    upgrade.MaxLevel = body.MaxLevel;
+                }
+                if (body.Prices != null) {
+                    for (var i = 0; i < body.Prices.Length; i++) {
+                        upgrade.SetPrice(i, body.Prices[i]);
+                    }
+                }
+                if (body.Values != null) {
+                    for (var i = 0; i < body.Values.Length; i++) {
+                        upgrade.SetValue(i, body.Values[i]);
+                    }
+                }
+            }
+            catch (JsonException ex) {
+                return ErrorResp("Wrong json format", ex);
+            } catch (Exception ex) {
+                return ErrorResp("error", ex, StatusCode.InternalServerError);
+            }
+
+            return new JsonResponse(JsonSerializer.Serialize(upgrade, defaultJsonOptions));
         }
 
         private int TryParseIndex(Request req, string name, int length, out Response resp) {
@@ -134,14 +190,21 @@ namespace tart.Server {
             return id;
         }
 
-        private static JsonResponse ErrorResp(string message) {
+        private static JsonResponse ErrorResp(string message, Exception ex = null, StatusCode status = StatusCode.BadRequest) {
             return new JsonResponse(new JSON {
                 ["message"] = message,
-            }, status: StatusCode.BadRequest);
+                ["ex"] = ex?.Message ?? "",
+            }, status: status);
         }
 
         struct CreateSimulationRequest {
             public int ModelIndex { get; set; }
+        }
+
+        struct UpdateUpgradeRequest {
+            public int MaxLevel { get; set; }
+            public double[] Prices { get; set; }
+            public double[] Values { get; set; }
         }
 
         class JSON : Dictionary<string, object> {

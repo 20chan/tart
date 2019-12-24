@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json.Serialization;
 
 namespace tart.Simulations.Models.Example {
@@ -42,7 +43,7 @@ namespace tart.Simulations.Models.Example {
         }
 
         private double GetMoneyPerSecond(int speedLevel, int moneyLevel) {
-            return SpeedUpgrade.Value(speedLevel) * MoneyUpgrade.Value(moneyLevel);
+            return SpeedUpgrade.GetValue(speedLevel) * MoneyUpgrade.GetValue(moneyLevel);
         }
 
         private int GetLevelOf(ExampleKind kind) {
@@ -58,7 +59,7 @@ namespace tart.Simulations.Models.Example {
         }
 
         private Stats GetStatsAfterUpgrade(ExampleKind kind) {
-            var price = GetUpgradeOf(kind).Price(GetLevelOf(kind));
+            var price = GetUpgradeOf(kind).GetPrice(GetLevelOf(kind));
             var speedLevel = kind == ExampleKind.Speed ? SpeedLevel + 1 : SpeedLevel;
             var moneyLevel = kind == ExampleKind.Money ? MoneyLevel + 1 : MoneyLevel;
             return GetStats(Money - price, speedLevel, moneyLevel);
@@ -72,7 +73,7 @@ namespace tart.Simulations.Models.Example {
                 var level = GetLevelOf(kind);
                 var upgrade = GetUpgradeOf(kind);
                 if (level < upgrade.MaxLevel) {
-                    yield return new Choice(this, Time, kind, upgrade.Price(level), stats, GetStatsAfterUpgrade(kind));
+                    yield return new Choice(this, Time, kind, upgrade.GetPrice(level), stats, GetStatsAfterUpgrade(kind));
                 }
             }
         }
@@ -94,22 +95,45 @@ namespace tart.Simulations.Models.Example {
         Type IGame.UpgradeType => typeof(ExampleKind);
 
         public class SimpleUpgrade : IUpgrade {
-            public int MaxLevel => Values.Length;
-            public double[] Prices, Values;
+            public int MaxLevel {
+                get => Values.Count;
+                set {
+                    if (value < 1) value = 1;
+                    while (value > Values.Count) {
+                        Prices.Add(0);
+                        Values.Add(0);
+                    }
+                    while (value < Values.Count) {
+                        Prices.RemoveAt(Prices.Count - 1);
+                        Values.RemoveAt(Values.Count - 1);
+                    }
+                }
+            }
+            public List<double> Prices, Values;
             public ExampleKind Kind;
 
             public SimpleUpgrade(int level, ExampleKind kind) {
-                Prices = new double[level - 1];
-                Values = new double[level];
+                Prices = new List<double>(Enumerable.Repeat<double>(0, level - 1));
+                Values = new List<double>(Enumerable.Repeat<double>(0, level));
                 Kind = kind;
             }
 
-            public double Price(int x) {
+            public double GetPrice(int x) {
                 return Prices[x];
             }
 
-            public double Value(int x) {
+            public double GetValue(int x) {
                 return Values[x];
+            }
+
+            public void SetPrice(int x, double value) {
+                if (x < 0 || Prices.Count <= x) return;
+                Prices[x] = value;
+            }
+
+            public void SetValue(int x, double value) {
+                if (x < 0 || Values.Count <= x) return;
+                Values[x] = value;
             }
 
             int IUpgrade.Type => (int)Kind;
