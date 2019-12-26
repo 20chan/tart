@@ -77,7 +77,7 @@ namespace tart.Simulations.Models.Example {
                 var level = GetLevelOf(kind);
                 var upgrade = GetUpgradeOf(kind);
                 if (level < upgrade.MaxLevel) {
-                    yield return new Choice(this, Time, kind, upgrade.GetPrice(level), stats, GetStatsAfterUpgrade(kind));
+                    yield return new Choice(this, Time, kind, upgrade.GetPrice(level), level, stats, GetStatsAfterUpgrade(kind));
                 }
             }
         }
@@ -174,14 +174,16 @@ namespace tart.Simulations.Models.Example {
 
             public ExampleKind UpgradeKind;
             public double Price;
+            public int CurrentLevel;
 
             public Stats CurrentStats, NextStats;
 
-            public Choice(ExampleGame game, float time, ExampleKind kind, double price, Stats current, Stats next) {
+            public Choice(ExampleGame game, float time, ExampleKind kind, double price, int level, Stats current, Stats next) {
                 Game = game;
                 Time = time;
                 UpgradeKind = kind;
                 Price = price;
+                CurrentLevel = level;
 
                 CurrentStats = current;
                 NextStats = next;
@@ -191,6 +193,7 @@ namespace tart.Simulations.Models.Example {
             float IChoice<ExampleGame>.Time => Time;
             double IChoice<ExampleGame>.Price => Price;
             int IChoice<ExampleGame>.Type => (int)UpgradeKind;
+            int IChoice<ExampleGame>.Level => CurrentLevel;
 
             IStats<ExampleGame> IChoice<ExampleGame>.CurrentStats => CurrentStats;
             IStats<ExampleGame> IChoice<ExampleGame>.NextStats => NextStats;

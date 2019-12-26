@@ -9,6 +9,7 @@ namespace tart.Simulations {
 
         double Price { get; }
         int Type { get; }
+        int Level { get; }
 
         IStats<T> CurrentStats { get; }
         IStats<T> NextStats { get; }
