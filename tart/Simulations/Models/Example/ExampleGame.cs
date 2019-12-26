@@ -123,7 +123,7 @@ namespace tart.Simulations.Models.Example {
 
         public class SimpleUpgrade : IUpgrade {
             public int MaxLevel {
-                get => Values.Count;
+                get => Prices.Count;
                 set {
                     if (value < 1) value = 1;
                     while (value > Values.Count) {
@@ -140,8 +140,8 @@ namespace tart.Simulations.Models.Example {
             public ExampleKind Kind;
 
             public SimpleUpgrade(int level, ExampleKind kind) {
-                Prices = new List<double>(Enumerable.Repeat<double>(0, level - 1));
-                Values = new List<double>(Enumerable.Repeat<double>(0, level));
+                Prices = new List<double>(Enumerable.Repeat<double>(0, level));
+                Values = new List<double>(Enumerable.Repeat<double>(0, level + 1));
                 Kind = kind;
             }
 
