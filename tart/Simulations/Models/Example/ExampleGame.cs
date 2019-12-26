@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json.Serialization;
+using Upgrade = tart.Simulations.SimpleUpgrade<tart.Simulations.Models.Example.ExampleKind>;
+using Choice = tart.Simulations.SimpleChoice<tart.Simulations.Models.Example.ExampleGame, tart.Simulations.Models.Example.ExampleKind>;
 
 namespace tart.Simulations.Models.Example {
     public class ExampleGame : IGame {
@@ -10,8 +10,8 @@ namespace tart.Simulations.Models.Example {
         public float Time;
 
         public IUpgrade[] Upgrades = {
-            new SimpleUpgrade(10, ExampleKind.Speed),
-            new SimpleUpgrade(20, ExampleKind.Money),
+            new Upgrade(10, ExampleKind.Speed),
+            new Upgrade(20, ExampleKind.Money),
         };
 
         public int[] Levels = {
@@ -90,8 +90,8 @@ namespace tart.Simulations.Models.Example {
             if (Money < choice.Price) {
                 return false;
             }
-            ref var level = ref GetLevelOf(choice.UpgradeKind);
-            if (level >= GetUpgradeOf(choice.UpgradeKind).MaxLevel) {
+            ref var level = ref GetLevelOf(choice.Kind);
+            if (level >= GetUpgradeOf(choice.Kind).MaxLevel) {
                 return false;
             }
 
@@ -126,85 +126,6 @@ namespace tart.Simulations.Models.Example {
         }
 
         Type IGame.UpgradeType => typeof(ExampleKind);
-
-        public class SimpleUpgrade : IUpgrade {
-            public int MaxLevel {
-                get => Prices.Count;
-                set {
-                    if (value < 1) value = 1;
-                    while (value > Values.Count) {
-                        Prices.Add(0);
-                        Values.Add(0);
-                    }
-                    while (value < Values.Count) {
-                        Prices.RemoveAt(Prices.Count - 1);
-                        Values.RemoveAt(Values.Count - 1);
-                    }
-                }
-            }
-            public List<double> Prices, Values;
-            public ExampleKind Kind;
-
-            public SimpleUpgrade(int level, ExampleKind kind) {
-                Prices = new List<double>(Enumerable.Repeat<double>(0, level));
-                Values = new List<double>(Enumerable.Repeat<double>(0, level + 1));
-                Kind = kind;
-            }
-
-            public double GetPrice(int x) {
-                return Prices[x];
-            }
-
-            public double GetValue(int x) {
-                return Values[x];
-            }
-
-            public void SetPrice(int x, double value) {
-                if (x < 0 || Prices.Count <= x) return;
-                Prices[x] = value;
-            }
-
-            public void SetValue(int x, double value) {
-                if (x < 0 || Values.Count <= x) return;
-                Values[x] = value;
-            }
-
-            int IUpgrade.Type => (int)Kind;
-            IEnumerable<double> IUpgrade.Prices => Prices;
-            IEnumerable<double> IUpgrade.Values => Values;
-        }
-
-        public class Choice : IChoice<ExampleGame> {
-            public ExampleGame Game;
-            public float Time;
-
-            public ExampleKind UpgradeKind;
-            public double Price;
-            public int CurrentLevel;
-
-            public Stats CurrentStats, NextStats;
-
-            public Choice(ExampleGame game, float time, ExampleKind kind, double price, int level, Stats current, Stats next) {
-                Game = game;
-                Time = time;
-                UpgradeKind = kind;
-                Price = price;
-                CurrentLevel = level;
-
-                CurrentStats = current;
-                NextStats = next;
-            }
-
-            ExampleGame IChoice<ExampleGame>.Game => Game;
-            float IChoice<ExampleGame>.Time => Time;
-            double IChoice<ExampleGame>.Price => Price;
-            int IChoice<ExampleGame>.Type => (int)UpgradeKind;
-            int IChoice<ExampleGame>.Level => CurrentLevel;
-            bool IChoice<ExampleGame>.Available => Game.Money >= Price;
-
-            IStats<ExampleGame> IChoice<ExampleGame>.CurrentStats => CurrentStats;
-            IStats<ExampleGame> IChoice<ExampleGame>.NextStats => NextStats;
-        }
 
         public struct Stats : IStats<ExampleGame> {
             public double Money { get; set; }
