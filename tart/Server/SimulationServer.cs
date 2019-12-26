@@ -109,6 +109,16 @@ namespace tart.Server {
             });
         }
 
+        [Get("/api/simulations/{simulationId}/history")]
+        public Response GetSimulationChoiceHistory(Request req) {
+            var simulIndex = TryParseIndex(req, "simulationId", _simulations.Count, out var errorResp);
+            if (simulIndex < 0) return errorResp;
+
+            var simul = _simulations[simulIndex];
+            var history = simul.GetChoiceHistory();
+            return new JsonResponse(JsonSerializer.Serialize(history, defaultJsonOptions));
+        }
+
         [Get("/api/simulations/{simulationId}/choices")]
         public Response GetChoicesOfSimulation(Request req) {
             var simulIndex = TryParseIndex(req, "simulationId", _simulations.Count, out var errorResp);

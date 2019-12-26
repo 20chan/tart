@@ -19,6 +19,8 @@ namespace tart.Simulations.Models.Example {
             0, // money
         };
 
+        public List<Choice> ChoiceHistory = new List<Choice>();
+
         public ref IUpgrade SpeedUpgrade => ref Upgrades[0];
         public ref IUpgrade MoneyUpgrade => ref Upgrades[1];
 
@@ -93,6 +95,8 @@ namespace tart.Simulations.Models.Example {
                 return false;
             }
 
+            ChoiceHistory.Add(choice);
+
             Money -= choice.Price;
             MoneyDec -= choice.Price;
             level++;
@@ -111,6 +115,8 @@ namespace tart.Simulations.Models.Example {
         IEnumerable<IChoice<IGame>> IGame.GetAvailableChoices() {
             return GetAvailableUpgrades();
         }
+
+        IEnumerable<IChoice<IGame>> IGame.GetChoiceHistory() => ChoiceHistory;
 
         bool IGame.TryChoice(IChoice<IGame> choice) {
             if (choice is Choice ch) {
