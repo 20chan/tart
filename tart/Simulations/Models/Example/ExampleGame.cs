@@ -32,6 +32,8 @@ namespace tart.Simulations.Models.Example {
 
         public void Tick(float deltaTime) {
             Time += deltaTime;
+
+            Income(deltaTime * SpeedUpgrade.GetValue(SpeedLevel) * MoneyUpgrade.GetValue(MoneyLevel) / 1000f);
         }
 
         private Stats GetStats() {
@@ -105,9 +107,7 @@ namespace tart.Simulations.Models.Example {
 
         IReadOnlyCollection<IUpgrade> IGame.Upgrades => Upgrades;
         IReadOnlyCollection<int> IGame.Levels => Levels;
-        IStats<IGame> IGame.GetStats() {
-            return GetStats();
-        }
+        IStats<IGame> IGame.Stats => GetStats();
         IEnumerable<IChoice<IGame>> IGame.GetAvailableChoices() {
             return GetAvailableUpgrades();
         }
@@ -194,6 +194,7 @@ namespace tart.Simulations.Models.Example {
             double IChoice<ExampleGame>.Price => Price;
             int IChoice<ExampleGame>.Type => (int)UpgradeKind;
             int IChoice<ExampleGame>.Level => CurrentLevel;
+            bool IChoice<ExampleGame>.Available => Game.Money >= Price;
 
             IStats<ExampleGame> IChoice<ExampleGame>.CurrentStats => CurrentStats;
             IStats<ExampleGame> IChoice<ExampleGame>.NextStats => NextStats;

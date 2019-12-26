@@ -15,7 +15,7 @@ namespace tart.Simulations {
 
         IReadOnlyCollection<IUpgrade> Upgrades { get; }
         IReadOnlyCollection<int> Levels { get; }
-        IStats<IGame> GetStats();
+        IStats<IGame> Stats { get; }
         IEnumerable<IChoice<IGame>> GetAvailableChoices();
 
         [JsonIgnore]

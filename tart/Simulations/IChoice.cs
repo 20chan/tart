@@ -10,6 +10,7 @@ namespace tart.Simulations {
         double Price { get; }
         int Type { get; }
         int Level { get; }
+        bool Available { get; }
 
         IStats<T> CurrentStats { get; }
         IStats<T> NextStats { get; }
