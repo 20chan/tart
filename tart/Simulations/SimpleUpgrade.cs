@@ -5,7 +5,7 @@ using System.Linq;
 namespace tart.Simulations {
     public class SimpleUpgrade<TKind> : IUpgrade where TKind : Enum {
         public List<double> Prices, Values;
-        public TKind Kind;
+        public TKind Kind { get; set; }
 
         public int MaxLevel {
             get => Prices.Count;

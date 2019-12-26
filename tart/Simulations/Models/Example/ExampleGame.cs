@@ -109,9 +109,9 @@ namespace tart.Simulations.Models.Example {
 
         float IGame.Time => Time;
 
-        IReadOnlyCollection<IUpgrade> IGame.Upgrades => Upgrades;
-        IReadOnlyCollection<int> IGame.Levels => Levels;
-        IStats<IGame> IGame.Stats => GetStats();
+        IEnumerable<IUpgrade> IGame.Upgrades => Upgrades;
+        IEnumerable<int> IGame.Levels => Levels;
+        IStats IGame.Stats => GetStats();
         IEnumerable<IChoice<IGame>> IGame.GetAvailableChoices() {
             return GetAvailableUpgrades();
         }
@@ -127,7 +127,7 @@ namespace tart.Simulations.Models.Example {
 
         Type IGame.UpgradeType => typeof(ExampleKind);
 
-        public struct Stats : IStats<ExampleGame> {
+        public struct Stats : IStats {
             public double Money { get; set; }
             public double MoneyPerSecond { get; set; }
             public int SpeedLevel { get; set; }

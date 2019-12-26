@@ -11,10 +11,10 @@ namespace tart.Simulations {
 
         public bool Available => Game.Money >= Price;
 
-        public IStats<TGame> CurrentStats { get; }
-        public IStats<TGame> NextStats { get; }
+        public IStats CurrentStats { get; }
+        public IStats NextStats { get; }
 
-        public SimpleChoice(TGame game, float time, TKind kind, double price, int level, IStats<TGame> current, IStats<TGame> next) {
+        public SimpleChoice(TGame game, float time, TKind kind, double price, int level, IStats current, IStats next) {
             Game = game;
             Time = time;
             Kind = kind;

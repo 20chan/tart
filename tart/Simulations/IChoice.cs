@@ -12,7 +12,7 @@ namespace tart.Simulations {
         int Level { get; }
         bool Available { get; }
 
-        IStats<T> CurrentStats { get; }
-        IStats<T> NextStats { get; }
+        IStats CurrentStats { get; }
+        IStats NextStats { get; }
     }
 }
